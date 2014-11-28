@@ -1,0 +1,62 @@
+application: <your_gae_app_name_here>
+version: 1
+runtime: python27
+api_version: 1
+threadsafe: yes
+
+handlers:
+- url: /signup
+  script: main.app
+  secure: always
+
+- url: /login
+  script: main.app
+  secure: always
+
+- url: /logout
+  script: main.app
+  secure: always
+
+- url: /forgot
+  script: main.app
+  secure: always
+
+- url: /application
+  script: main.app
+  secure: always
+  login: required
+
+- url: /v1/applications
+  script: main.app
+  secure: always
+  login: required
+
+- url: /v1/experiments
+  script: main.app
+  secure: always
+  login: required
+
+- url: /v1/variations
+  script: main.app
+  secure: always
+  login: required
+
+- url: /v1/tests
+  script: main.app
+  secure: always
+
+- url: /
+  script: main.app
+  secure: always
+
+- url: /favicon\.ico
+  static_files: favicon.ico
+  upload: favicon\.ico
+
+- url: /app
+  static_dir: app
+  secure: always
+
+libraries:
+- name: webapp2
+  version: "2.5.2"

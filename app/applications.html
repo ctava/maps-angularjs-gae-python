@@ -1,0 +1,134 @@
+
+<div class="well pop" ng-show="currentApplication == null">
+  <a class="pull-right" href="/logout">Logout</a>
+  <h1 class="lead">Application(s)</h1>
+
+  <form class="form-search pull-left">
+    <div class="input-append">
+      <input type="text" ng-model="filterApplications" class="span2 search-query padded" placeholder="Filter applications">
+      <button ng-click="filterApplications = null" class="btn">Clear Filter</button>
+    </div>
+  </form>
+  <button class="pull-right" ng-click="addApplication()" class="btn">Add</button>
+  <table class="table table-striped table-bordered app-listing">
+    <thead>
+      <tr>
+        <th class="span1">ApplicationID</th>
+        <th class="span1">Name</th>
+        <th class="span1">Experiment(s) Published? (Y/N)</th>
+        <th class="span1">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-click="showExperimentsForApplication(application.applicationID)" onMouseOver="this.className='highlight'" onMouseOut="this.className='normal'" ng-repeat="application in applications | filter:filterApplications">
+        <td class="text-center"><a ng-click="showApplication(application.applicationID)">{{application.applicationID}}</a></td>
+        <td class="text-center"><a ng-click="showApplication(application.applicationID)">{{application.applicationName}}</a></td>
+        <td class="text-center">{{application.experimentPublished|yesno}}</td>
+        <td class="text-center"><div ng-show="application.experimentAvailable == 1 && application.variationAvailable == 1 && application.experimentPublished == 0"><a ng-click="publishExperiments(application.applicationID)">Publish Experiment(s)</a></div><div ng-show="application.experimentAvailable == 0 && application.experimentPublished == 0"><div class="text-left">Experiment(s) need to be added in order to publish.</div></div><div ng-show="application.variationAvailable == 0 && application.experimentPublished == 0"><div class="text-left">Variation(s) need to be added in order to publish.</div></div><div ng-show="application.experimentPublished == 1"><a ng-click="unpublishExperiments(application.applicationID)">Un-publish Experiment(s)</a></div></td>
+        <td class="text-center"><div ng-show="application.experimentPublished == 0"><a ng-click="deleteApplication(application.applicationID)">Delete</a></div><div ng-show="application.experimentPublished == 1"><div class="text-left">Delete Not Available. Experiments are published.</div></div></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="well pop" ng-show="currentApplication != null && currentExperiment == null">
+  <a ng-click="showOnlyApplications()">&laquo Back</a>
+  <a class="pull-right" ng-show="currentApplication.applicationName != null && currentApplication.experimentPublished == 0" ng-click="saveApplication()">Save</a>
+  <h1 class="lead">Application</h1>
+  <dl class="dl-horizontal">
+    <dt>ApplicationID</dt>
+    <dd>{{currentApplication.applicationID}}</dd>
+    <dt>Name</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentApplication.applicationName" class="span3" placeholder="currentApplication.applicationName"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentApplication.applicationName}}</div></dd>
+  </dl>
+
+  <h1 class="lead">Experiments</h1>
+  <form class="form-search pull-left">
+    <div class="input-append">
+      <input type="text" ng-model="filterExperiments" class="span2 search-query" placeholder="Filter experiments">
+      <button ng-click="filterExperiments = null" class="btn">Clear Filter</button>
+    </div>
+  </form>
+  <div ng-show="currentApplication.experimentPublished == 0"><button class="pull-right" ng-click="addExperiment()" class="btn">Add</button></div>
+  <table class="table table-striped table-bordered app-listing">
+    <thead>
+      <tr>
+        <th class="span1">ExperimentID</th>
+        <th class="span1">Name</th>
+        <th class="span1">Recuitment Duration (days)</th>
+        <th class="span1">Duration (days)</th>
+        <th class="span1">Start Date</th>
+        <th class="span1">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-click="showVariationsForExperiment(experiment.experimentID)" onMouseOver="this.className='highlight'" onMouseOut="this.className='normal'" ng-repeat="experiment in experiments | filter:filterExperiments">
+        <td class="text-center"><a ng-click="showExperiment(experiment.experimentID)">{{experiment.experimentID}}</a></td>
+        <td class="text-center"><a ng-click="showExperiment(experiment.experimentID)">{{experiment.experimentName}}</a></td>
+        <td class="text-center">{{experiment.experimentRecruitmentDuration}}</td>
+        <td class="text-center">{{experiment.experimentDuration}}</td>
+        <td><div id="datepicker" type="text" class="hasDatepicker">{{experiment.experimentStartDate}}</div></td>
+        <td class="text-center"><div ng-show="{{currentApplication.experimentPublished}} == 0"><a ng-click="deleteExperiment(experiment.applicationID,experiment.experimentID)">Delete</a></div><div ng-show="{{currentApplication.experimentPublished}} == 1"><div class="text-left">Delete Not Available. Experiments are published.</div></div></td>        
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="well pop" ng-show="currentApplication != null && currentExperiment != null && currentVariation == null">
+  <a ng-click="showAllExperiments()">&laquo Back</a><a class="pull-right" ng-show="currentExperiment.experimentName != null && currentApplication.experimentPublished != 1" ng-click="saveExperiment()">Save</a>
+  <h1 class="lead">Experiment</h1>
+  <dl class="dl-horizontal">
+    <dt>ExperimentID</dt>
+    <dd>{{currentExperiment.experimentID}}</dd>
+    <dt>Name</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentExperiment.experimentName" class="span3" placeholder="{{currentExperiment.experimentName}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentExperiment.experimentName}}</div></dd>
+    <dt>Recruitment Duration (days)</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentExperiment.experimentRecruitmentDuration" class="span1" placeholder="{{currentExperiment.experimentRecruitmentDuration}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentExperiment.experimentRecruitmentDuration}}</div></dd>
+    <dt>Experiment Duration (days)</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentExperiment.experimentDuration" class="span1" placeholder="{{currentExperiment.experimentDuration}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentExperiment.experimentDuration}}</div></dd> 
+    <dt>Start Date</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentExperiment.experimentStartDate" class="span2" placeholder="{{currentExperiment.experimentStartDate}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentExperiment.experimentStartDate}}</div></dd>  
+  </dl>
+
+  <h1 class="lead">Variations</h1>
+  <form class="form-search pull-left">
+    <div class="input-append">
+      <input type="text" ng-model="filterVariations" class="span2 search-query" placeholder="Filter variations">
+      <button ng-click="filterVariations = null" class="btn">Clear Filter</button>
+    </div>
+  </form>
+  <button class="pull-right" ng-show="currentApplication != null && currentExperiment != null && currentApplication.experimentPublished != 1" ng-click="addVariation(currentApplication.applicationID,currentExperiment.experimentID)" class="btn">Add</button>
+  <table class="table table-striped table-bordered app-listing">
+    <thead>
+      <tr>
+        <th class="span1">VariationID</th>
+        <th class="span1">Name</th>
+        <th class="span1">Percentage</th>
+        <th ng-show="currentApplication.experimentPublished != 1" class="span1">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="variation in variations | filter:filterVariations">
+        <td class="text-center"><a ng-click="showVariation(variation.variationID)">{{variation.variationID}}</a></td>
+        <td class="text-center"><a ng-click="showVariation(variation.variationID)">{{variation.variationName}}</a></td>
+        <td class="text-center">{{variation.variationPercentage}}</td>
+        <td class="text-center" ng-show="currentApplication.experimentPublished != 1" ><a ng-click="deleteVariation(variation.variationID)">Delete</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="well pop" ng-show="currentApplication != null && currentExperiment != null && currentVariation != null">
+  <a ng-click="showAllVariations()">&laquo Back</a><a class="pull-right" ng-show="currentVariation.variationName != null && currentApplication.experimentPublished != 1" ng-click="saveVariation()">Save</a>
+  <h1 class="lead">Variation</h1>
+  <dl class="dl-horizontal">
+    <dt>VariationID</dt>
+    <dd>{{currentVariation.variationID}}</dd>
+    <dt>Name</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentVariation.variationName" class="span3" placeholder="{{currentVariation.variationName}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentVariation.variationName}}</div></dd>
+    <dt>Percentage</dt>
+    <dd><div ng-show="currentApplication.experimentPublished == 0"><input type="text" ng-model="currentVariation.variationPercentage" class="span1" placeholder="{{currentVariation.variationPercentage}}"></div><div ng-show="currentApplication.experimentPublished == 1">{{currentVariation.variationPercentage}}</div></dd>
+  </dl>
+</div>
+
+<div class="padded">maps: v<span app-version></span></div>
